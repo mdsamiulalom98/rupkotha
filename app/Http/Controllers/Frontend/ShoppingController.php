@@ -31,6 +31,7 @@ class ShoppingController extends Controller
                 'slug' => $productInfo->slug,
                 'purchase_price' => $productInfo->purchase_price,
                 'category_id' => $productInfo->category_id,
+                'type' => $productInfo->type,
             ]
         ]);
 
@@ -40,7 +41,7 @@ class ShoppingController extends Controller
 
     public function cart_store(Request $request)
     {
-        $product = Product::select('id', 'name', 'slug', 'new_price', 'old_price', 'purchase_price', 'type', 'stock','category_id')->where(['id' => $request->id])->first();
+        $product = Product::select('id', 'name', 'slug', 'new_price', 'old_price', 'purchase_price', 'type', 'stock', 'category_id')->where(['id' => $request->id])->first();
         $var_product = ProductVariable::where(['product_id' => $request->id, 'color' => $request->product_color, 'size' => $request->product_size])->first();
         if ($product->type == 0) {
             $purchase_price = $var_product ? $var_product->purchase_price : 0;
@@ -55,11 +56,18 @@ class ShoppingController extends Controller
         }
         $cartitem = Cart::instance('shopping')->content()->where('id', $product->id)->first();
         if ($cartitem) {
-            $cart_qty = $cartitem->qty + $request->qty??1;
+            $cart_qty = $cartitem->qty + $request->qty ?? 1;
         } else {
-            $cart_qty = $request->qty??1;
+            $cart_qty = $request->qty ?? 1;
         }
         if ($stock < $cart_qty) {
+            if($request->type == 'cart') {
+                $response = [
+                    'success' => false,
+                    'message' => 'Product stock limit over'
+                ];
+                return response()->json($response);
+            }
             Toastr::error('Product stock limit over', 'Failed!');
             return back();
         }
@@ -67,7 +75,7 @@ class ShoppingController extends Controller
         Cart::instance('shopping')->add([
             'id' => $product->id,
             'name' => $product->name,
-            'qty' => $request->qty??1,
+            'qty' => $request->qty ?? 1,
             'price' => $new_price,
             'weight' => 1,
             'options' => [
@@ -79,16 +87,18 @@ class ShoppingController extends Controller
                 'product_color' => $request->product_color,
                 'type' => $product->type,
                 'category_id' => $product->category_id,
-                'free_shipping' =>  0
+                'free_shipping' => 0
             ],
         ]);
 
-
-
-        Toastr::success('Product successfully add to cart', 'Success!');
-        if ($request->add_cart) {
-            return back();
+        if($request->type == 'cart') {
+            $response = [
+                'success' => true,
+                'message' => 'Product successfully add to cart'
+            ];
+            return response()->json($response);
         }
+        Toastr::success('Product successfully add to cart', 'Success!');
         return redirect()->route('customer.checkout');
     }
     public function campaign_stock(Request $request)
@@ -161,5 +171,10 @@ class ShoppingController extends Controller
     {
         $data = Cart::instance('shopping')->content();
         return view('frontEnd.layouts.ajax.cart_camp', compact('data'));
+    }
+    public function mini_cart(Request $request)
+    {
+        $data = Cart::instance('shopping')->content();
+        return view('frontEnd.layouts.partials.mini_cart', compact('data'));
     }
 }

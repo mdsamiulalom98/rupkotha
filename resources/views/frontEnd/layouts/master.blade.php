@@ -102,7 +102,7 @@
         </div>
     @endif
     @php $subtotal = Cart::instance('shopping')->subtotal(); @endphp
-    <div class="mobile-menu">
+    <div class="mobile-menu no-print">
         <div class="mobile-menu-logo">
             <div class="logo-image">
                 <img src="{{ asset($generalsetting->dark_logo) }}" alt="" />
@@ -330,7 +330,7 @@
     </div>
     <!-- content end -->
     <footer>
-        <div class="footer-top">
+        <div class="footer-top" style="background-image: url({{ asset($generalsetting->footer_image) }})">
             <div class="container">
                 <div class="row">
                     <div class="col-sm-4">
@@ -506,6 +506,14 @@
     <div id="loading">
         <div class="custom-loader"></div>
     </div>
+
+    <!-- cart sidebar -->
+    <div class="mini-cart-wrapper">
+        @include('frontEnd.layouts.partials.mini_cart')
+    </div>
+    <!-- cart sidebar -->
+
+
     <script src="{{ asset('public/frontEnd/js/bootstrap.min.js') }}"></script>
     <script src="{{ asset('public/frontEnd/js/owl.carousel.min.js') }}"></script>
     <script src="{{ asset('public/frontEnd/js/mobile-menu.js') }}"></script>
@@ -564,26 +572,66 @@
                     success: function(data) {
                         if (data) {
                             toastr.success("Success", "Product add to cart successfully");
+                            $("#page-overlay").show();
+                            mini_cart();
+                            $('.mini-cart-wrapper').addClass('active');
+                            cart_close();
                             return cart_count() + mobile_cart();
                         }
                     },
                 });
             }
         });
-        $(".cart_store").on("click", function() {
+
+        function cart_close() {
+            setInterval(function() {
+                console.log("Cart is closing..."); // Example task
+
+                $("#page-overlay").hide();
+                $('.mini-cart-wrapper').removeClass('active');
+                window.location.href = "{{ route('customer.checkout') }}";
+                // Example: Show a notification
+                toastr.info("Your product is going to be ordered.");
+
+            }, 5000); // Runs every 5 seconds
+        }
+
+        $(".add_cart_btn").on("click", function() {
             var id = $(this).data("id");
-            var qty = $(this).parent().find("input").val();
+            var type = $(this).data('type');
+            var qty = $('#details_qty').val();
+            var colorCount = $(".stock_color").length;
+            var sizeCount = $(".stock_size").length;
+            var color = $(".stock_color:checked").data('color');
+            var size = $(".stock_size:checked").data('size');
+            // return size;
+            if (!color && colorCount > 0) {
+                toastr.error("Please select any color2");
+                return false;
+            }
+            if (!size && sizeCount > 0) {
+                toastr.warning("Please select any size");
+                return false;
+            }
             if (id) {
                 $.ajax({
-                    type: "GET",
+                    type: "POST",
                     data: {
                         id: id,
-                        qty: qty ? qty : 1
+                        type: type,
+                        qty: qty ? qty : 1,
+                        product_color: color,
+                        product_size: size,
+                        _token: $('meta[name="csrf-token"]').attr('content'),
                     },
                     url: "{{ route('cart.store') }}",
                     success: function(data) {
                         if (data) {
-                            toastr.success("Success", "Product add to cart succfully");
+                            toastr.success("Success", "Product add to cart successfully");
+                            $("#page-overlay").show();
+                            mini_cart();
+                            $('.mini-cart-wrapper').addClass('active');
+                            cart_close();
                             return cart_count() + mobile_cart();
                         }
                     },
@@ -672,6 +720,17 @@
                     } else {
                         $(".mobilecart-qty").empty();
                     }
+                },
+            });
+        }
+
+        function mini_cart() {
+            $.ajax({
+                type: "GET",
+                url: "{{ route('mini.cart') }}",
+                dataType: "html",
+                success: function(data) {
+                    $(".mini-cart-wrapper").html(data);
                 },
             });
         }

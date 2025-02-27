@@ -597,6 +597,21 @@
                             </div>
                         </div>
                         <!-- col end -->
+                        <div class="col-sm-3 mb-3">
+                            <div class="form-group">
+                                <label for="has_cod" class="d-block">COD Available</label>
+                                <label class="switch">
+                                    <input type="checkbox" value="1" name="has_cod" />
+                                    <span class="slider round"></span>
+                                </label>
+                                @error('has_cod')
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $message }}</strong>
+                                    </span>
+                                @enderror
+                            </div>
+                        </div>
+                        <!-- col end -->
                         <!-- col end -->
 
                         <!-- col end -->

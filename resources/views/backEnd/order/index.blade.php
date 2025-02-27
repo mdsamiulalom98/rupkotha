@@ -6,10 +6,7 @@
         <div class="row">
             <div class="col-12">
                 <div class="page-title-box">
-                    <div class="page-title-right">
-                        <a href="{{ route('admin.order.create') }}" class="btn btn-danger rounded-pill"><i
-                                class="fe-shopping-cart"></i> Add New</a>
-                    </div>
+                    
                     <h4 class="page-title">{{ $order_status->name }} Order ({{ $order_status->orders_count }})</h4>
                 </div>
             </div>
@@ -22,6 +19,10 @@
                         <div class="row">
                             <div class="col-sm-8">
                                 <ul class="action2-btn">
+                                    <li>
+                                        <a href="{{ route('admin.order.create') }}" class="btn btn-danger rounded-pill"><i
+                                            class="fe-shopping-cart"></i> Add New</a>
+                                    </li>
                                     <li><a data-bs-toggle="modal" data-bs-target="#asignUser"
                                             class="btn rounded-pill btn-success"><i class="fe-plus"></i> Assign User</a>
                                     </li>
@@ -271,13 +272,13 @@
         </div>
     @endforeach
     <!-- pathao courier  End-->
-    
+
      <!-- quckview modal modal -->
         <form>
             <div class="modal fade" id="fraud_checker_modal" tabindex="-1" aria-labelledby="fraud_checker_modal" aria-hidden="true">
               <div class="modal-dialog modal-lg ">
                 <div class="modal-content" id="fraud_checker_details">
-                  
+
                 </div>
               </div>
             </div>
@@ -466,12 +467,12 @@
             $("#fraud_checker_details").html('<div class="loader"></div>');
             $.ajax({
                 type: "POST",
-                data: { 
+                data: {
                     _token: "{{ csrf_token() }}",
                     id: id
                 },
                 url: "{{route('admin.order.fraud_checker')}}",
-                success:function(data){               
+                success:function(data){
                 if(data){
                     $("#fraud_checker_details").html(data);
                 }

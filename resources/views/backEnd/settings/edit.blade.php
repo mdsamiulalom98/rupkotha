@@ -46,7 +46,7 @@
                                     <label for="white_logo" class="form-label">White Logo *</label>
                                     <input type="file" class="form-control @error('white_logo') is-invalid @enderror"
                                         name="white_logo" value="{{ old('white_logo') }}" id="white_logo">
-                                    <img src="{{ asset($edit_data->white_logo) }}" class="edit-image" alt="">
+                                    <img src="{{ asset($edit_data->white_logo) }}" style="height: 60px;width: auto;" alt="">
                                     @error('white_logo')
                                         <span class="invalid-feedback" role="alert">
                                             <strong>{{ $message }}</strong>
@@ -60,7 +60,7 @@
                                     <label for="dark_logo" class="form-label">Dark Logo *</label>
                                     <input type="file" class="form-control @error('dark_logo') is-invalid @enderror"
                                         name="dark_logo" value="{{ old('dark_logo') }}" id="dark_logo">
-                                    <img src="{{ asset($edit_data->dark_logo) }}" class="edit-image" alt="">
+                                    <img src="{{ asset($edit_data->dark_logo) }}"  style="height: 60px;width: auto;" alt="">
                                     @error('dark_logo')
                                         <span class="invalid-feedback" role="alert">
                                             <strong>{{ $message }}</strong>
@@ -74,8 +74,22 @@
                                     <label for="favicon" class="form-label">Favicon Logo *</label>
                                     <input type="file" class="form-control @error('favicon') is-invalid @enderror"
                                         name="favicon" value="{{ old('favicon') }}" id="favicon">
-                                    <img src="{{ asset($edit_data->favicon) }}" class="edit-image" alt="">
+                                    <img src="{{ asset($edit_data->favicon) }}"  style="height: 60px;width: auto;" alt="">
                                     @error('favicon')
+                                        <span class="invalid-feedback" role="alert">
+                                            <strong>{{ $message }}</strong>
+                                        </span>
+                                    @enderror
+                                </div>
+                            </div>
+                            <!-- col end -->
+                            <div class="col-sm-6 mb-3">
+                                <div class="form-group">
+                                    <label for="footer_image" class="form-label">Footer Image *</label>
+                                    <input type="file" class="form-control @error('footer_image') is-invalid @enderror"
+                                        name="footer_image" value="{{ old('footer_image') }}" id="footer_image">
+                                    <img src="{{ asset($edit_data->footer_image) }}"  style="height: 80px;width: auto;" alt="">
+                                    @error('footer_image')
                                         <span class="invalid-feedback" role="alert">
                                             <strong>{{ $message }}</strong>
                                         </span>
@@ -109,7 +123,7 @@
                                 </div>
                             </div>
                             <!-- col end -->
-                            <div class="col-sm-12 mb-3">
+                            <div class="col-sm-6 mb-3">
                                 <div class="form-group">
                                     <label for="meta_title" class="form-label">Meta Title (SEO)</label>
                                     <input type="text" class="form-control @error('meta_title') is-invalid @enderror"

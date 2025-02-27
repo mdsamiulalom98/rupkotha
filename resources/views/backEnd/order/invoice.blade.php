@@ -58,7 +58,7 @@
                 <div class="col-sm-6">
                     <button onclick="printFunction()"class="no-print btn btn-xs btn-success waves-effect waves-light"><i
                             class="fa fa-print"></i></button>
-                </div> 
+                </div>
                 <div class="col-sm-12 mt-3">
                     <div class="invoice-innter"
                         style="width:760px;margin: 0 auto;background: #fff;overflow: hidden;padding: 30px;padding-top: 0;">
@@ -66,11 +66,11 @@
                             <tr>
                                 <td style="width: 40%; float: left; padding-top: 15px;">
                                     <img src="{{ asset($generalsetting->dark_logo) }}"
-                                        style="margin-top:25px !important;width:160px" alt="">
-                                    <p style="font-size: 14px; margin-top:15px; color: #222;"><strong>Payment
+                                        style="width:160px" alt="">
+                                    {{-- <p style="font-size: 14px; margin-top:15px; color: #222;"><strong>Payment
                                             Method:</strong> <span
                                             style="text-transform: uppercase;">{{ $order->payment ? $order->payment->payment_method : '' }}</span>
-                                    </p>
+                                    </p> --}}
                                     @if ($order->payment->sender_number)
                                         <p> Sender Number : {{ $order->payment->sender_number }}</p>
                                     @endif
@@ -106,7 +106,7 @@
                                             Invoice Date: <strong>{{ $order->created_at->format('d-m-y') }}</strong></span>
                                         </p>
                                     </div>
-                                    <div class="invoice_to" style="padding-top: 20px;">
+                                    <div class="invoice_to" style="padding-top: 0px;">
                                         <p style="font-size:16px;line-height:1.8;color:#222;text-align: right;">
                                             <strong>Invoice To:</strong></p>
                                         <p style="font-size:16px;line-height:1.8;color:#222;text-align: right;">
@@ -125,11 +125,12 @@
                                 </td>
                             </tr>
                         </table>
-                        <table class="table" style="margin-top: 30px;margin-bottom: 0;">
+                        <table class="table" style="margin-top: 10px;margin-bottom: 0;">
                             <thead style="background: #4DBC60; color: #fff;">
                                 <tr>
                                     <th>SL</th>
                                     <th>Product</th>
+                                    <th>Product Code</th>
                                     <th>Price</th>
                                     <th>Qty</th>
                                     <th>Total</th>
@@ -146,6 +147,7 @@
                                                     <small>Color: {{ $value->product_color }}</small>
                                                 @endif
                                         </td>
+                                        <td>{{ $value->product_code }}</td>
                                         <td>৳{{ $value->sale_price }}</td>
                                         <td>{{ $value->qty }}</td>
                                         <td>৳{{ $value->sale_price * $value->qty }}</td>

@@ -111,7 +111,6 @@ class OrderController extends Controller
         }
     }
 
-
     public function index($slug, Request $request)
     {
         if ($slug == 'all') {
@@ -240,24 +239,24 @@ class OrderController extends Controller
                 'Accept' => 'application/json',
                 'Content-Type' => 'application/json',
             ])->post($pathao_info->url . '/api/v1/orders', [
-                'store_id' => $request->pathaostore,
-                'merchant_order_id' => $order->invoice_id,
-                'sender_name' => 'Test',
-                'sender_phone' => $order->shipping ? $order->shipping->phone : '',
-                'recipient_name' => $order->shipping ? $order->shipping->name : '',
-                'recipient_phone' => $order->shipping ? $order->shipping->phone : '',
-                'recipient_address' => $order->shipping ? $order->shipping->address : '',
-                'recipient_city' => $request->pathaocity,
-                'recipient_zone' => $request->pathaozone,
-                'recipient_area' => $request->pathaoarea,
-                'delivery_type' => 48,
-                'item_type' => 2,
-                'special_instruction' => 'Special note- product must be check after delivery',
-                'item_quantity' => $order_count,
-                'item_weight' => 0.5,
-                'amount_to_collect' => round($order->amount),
-                'item_description' => 'Special note- product must be check after delivery',
-            ]);
+                        'store_id' => $request->pathaostore,
+                        'merchant_order_id' => $order->invoice_id,
+                        'sender_name' => 'Test',
+                        'sender_phone' => $order->shipping ? $order->shipping->phone : '',
+                        'recipient_name' => $order->shipping ? $order->shipping->name : '',
+                        'recipient_phone' => $order->shipping ? $order->shipping->phone : '',
+                        'recipient_address' => $order->shipping ? $order->shipping->address : '',
+                        'recipient_city' => $request->pathaocity,
+                        'recipient_zone' => $request->pathaozone,
+                        'recipient_area' => $request->pathaoarea,
+                        'delivery_type' => 48,
+                        'item_type' => 2,
+                        'special_instruction' => 'Special note- product must be check after delivery',
+                        'item_quantity' => $order_count,
+                        'item_weight' => 0.5,
+                        'amount_to_collect' => round($order->amount),
+                        'item_description' => 'Special note- product must be check after delivery',
+                    ]);
         }
         if ($response->status() == '200') {
             $order->order_status = 5;
@@ -299,6 +298,23 @@ class OrderController extends Controller
         $shipping_update->area = $request->area;
         $shipping_update->save();
 
+        if ($request->status == 1 && $order_status > 1) {
+            $orders_details = OrderDetails::where('order_id', $order->id)->get();
+            foreach ($orders_details as $order_detail) {
+                if ($order_detail->type == 1) {
+                    $product = Product::find($order_detail->product_id);
+                    $product->stock -= $order_detail->qty;
+                    $product->sold += $order_detail->qty;
+                    $product->save();
+                } else {
+                    $product = ProductVariable::where(['product_id' => $order_detail->product_id, 'color' => $order_detail->product_color, 'size' => $order_detail->product_size])->first();
+                    $product->stock -= $order_detail->qty;
+                    $product->sold += $order_detail->qty;
+                    $product->save();
+                }
+            }
+        }
+
         // if ($request->status == 5 && $order_status != 5) {
         //     $courier_info = Courierapi::where(['status' => 1, 'type' => 'steadfast'])->first();
         //     if ($courier_info) {
@@ -323,20 +339,7 @@ class OrderController extends Controller
         //     }
         // }
         if ($request->status == 6 && $order_status != 6) {
-            $orders_details = OrderDetails::where('order_id', $order->id)->get();
-            foreach ($orders_details as $order_detail) {
-                if ($order_detail->type == 1) {
-                    $product = Product::find($order_detail->product_id);
-                    $product->stock -= $order_detail->qty;
-                    $product->sold += $order_detail->qty;
-                    $product->save();
-                } else {
-                    $product = ProductVariable::where(['product_id' => $order_detail->product_id, 'color' => $order_detail->product_color, 'size' => $order_detail->product_size])->first();
-                    $product->stock -= $order_detail->qty;
-                    $product->sold += $order_detail->qty;
-                    $product->save();
-                }
-            }
+
         }
 
         Toastr::success('Success', 'Order status change successfully');
@@ -385,25 +388,34 @@ class OrderController extends Controller
     public function order_status(Request $request)
     {
         // return $request->all();
-        $orders = Order::whereIn('id', $request->input('order_ids'))->update(['order_status' => $request->order_status]);
+        Order::whereIn('id', $request->input('order_ids'))->update(['order_status' => $request->order_status]);
 
-        if ($request->order_status == 6) {
+        if ($request->order_status > 1) {
             $orders = Order::whereIn('id', $request->input('order_ids'))->with('payment')->get();
             foreach ($orders as $order) {
-                $orders_details = OrderDetails::where('order_id', $order->id)->get();
+                if ($order->order_status == 1) {
+                    $orders_details = OrderDetails::where('order_id', $order->id)->get();
+                    foreach ($orders_details as $order_detail) {
+                        if ($order_detail->product_type == 1) {
+                            $product = Product::find($order_detail->product_id);
+                            if ($product) {
+                                $product->stock = max(0, $product->stock - $order_detail->qty);
+                                $product->sold += $order_detail->qty;
+                                $product->save();
+                            }
+                        } else {
+                            $product = ProductVariable::where([
+                                'product_id' => $order_detail->product_id,
+                                'color' => $order_detail->product_color,
+                                'size' => $order_detail->product_size
+                            ])->first();
 
-                foreach ($orders_details as $order_detail) {
-
-                    if ($order_detail->product_type == 1) {
-                        $product = Product::find($order_detail->product_id);
-                        $product->stock -= $order_detail->qty;
-                        $product->sold += $order_detail->qty;
-                        $product->save();
-                    } else {
-                        $product = ProductVariable::where(['product_id' => $order_detail->product_id, 'color' => $order_detail->product_color, 'size' => $order_detail->product_size])->first();
-                        $product->stock -= $order_detail->qty;
-                        $product->sold += $order_detail->qty;
-                        $product->save();
+                            if ($product) {
+                                $product->stock = max(0, $product->stock - $order_detail->qty);
+                                $product->sold += $order_detail->qty;
+                                $product->save();
+                            }
+                        }
                     }
                 }
             }
@@ -592,7 +604,7 @@ class OrderController extends Controller
                 $product->sold += $order_details->qty;
                 $product->save();
             } else {
-                $product = ProductVariable::where(['product_id' => $order_details->product_id])->orWhere('color',$order_details->product_color)->first();
+                $product = ProductVariable::where(['product_id' => $order_details->product_id])->orWhere('color', $order_details->product_color)->first();
                 $product->stock -= $order_details->qty;
                 $product->sold += $order_details->qty;
                 $product->save();
@@ -724,7 +736,8 @@ class OrderController extends Controller
         return redirect()->back();
     }
 
-    public function order_edit($invoice_id){
+    public function order_edit($invoice_id)
+    {
         $data = Order::where(['invoice_id' => $invoice_id])->select('id', 'invoice_id', 'order_status', 'order_type')->with('orderdetails', 'shipping')->first();
         $products = Product::select('id', 'name', 'new_price')->where(['status' => 1])->get();
         $shippingcharge = Shippingcharge::get();
@@ -973,9 +986,10 @@ class OrderController extends Controller
         Session::put('cpaid', $amount);
         return response()->json($amount);
     }
-     public function fraud_checker(Request $request){
+    public function fraud_checker(Request $request)
+    {
 
-        $shipping = Shipping::where('order_id',$request->id)->first();
+        $shipping = Shipping::where('order_id', $request->id)->first();
         $headers = [
             'email' => 'zadumia441@gmail.com',
             'api_key' => 'JQAGMXHUUNPAAA5W',
@@ -1007,12 +1021,24 @@ class OrderController extends Controller
         $total_cancel = $result['total_cancel'] ?? 0;
         $status = $result['status'] ?? 0;
         return view('backEnd.order.fraud_checker', compact(
-            'status','name', 'phone',
-            'steadfast_total', 'steadfast_success', 'steadfast_cancel',
-            'pathao_total', 'pathao_success', 'pathao_cancel',
-            'redx_total', 'redx_success', 'redx_cancel',
-            'paperfly_total', 'paperfly_success', 'paperfly_cancel',
-            'total_parcel', 'total_success', 'total_cancel'
+            'status',
+            'name',
+            'phone',
+            'steadfast_total',
+            'steadfast_success',
+            'steadfast_cancel',
+            'pathao_total',
+            'pathao_success',
+            'pathao_cancel',
+            'redx_total',
+            'redx_success',
+            'redx_cancel',
+            'paperfly_total',
+            'paperfly_success',
+            'paperfly_cancel',
+            'total_parcel',
+            'total_success',
+            'total_cancel'
         ));
-     }
+    }
 }

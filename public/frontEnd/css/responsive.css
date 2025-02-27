@@ -885,6 +885,12 @@
     footer {
         padding-bottom: 55px !important;
     }
+
+    .related-product-mobile {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
 }
 
 @media only screen and (min-width:767px) and (max-width:991px) {
@@ -896,4 +902,9 @@
 
 @media only screen and (min-width:992px) and (max-width:1140px) {}
 
-@media only screen and (min-width:1141px) {}
+@media only screen and (min-width:1141px) {
+    .contact-us-container .call-contact-us {
+        flex-direction: column;
+        text-align: center;
+    }
+}

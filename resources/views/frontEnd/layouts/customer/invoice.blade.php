@@ -3,7 +3,7 @@
 @section('content')
 <style>
 
- 
+
     .customer-invoice {
         margin: 25px 0;
     }
@@ -30,19 +30,19 @@
             <div class="col-sm-6">
                 <a href="{{route('customer.orders')}}"><strong><i class="fa-solid fa-arrow-left"></i> Back To Order</strong></a>
             </div>
-            
-          
+
+
             <div class="col-sm-6">
                 <button onclick="printFunction()" class="no-print invoice_btn"><i class="fa fa-print"></i></button>
             </div>
-           
+
             <div class="col-sm-12">
                 <div class="invoice-innter" style="width: 900px;margin: 0 auto;background: #f9f9f9;overflow: hidden;padding: 30px;padding-top: 0;">
                     <table style="width:100%">
                         <tr>
                             <td style="width: 40%; float: left; padding-top: 15px;">
                                 <img src="{{asset($generalsetting->white_logo)}}" style="margin-top:25px !important;width:150px" alt="">
-                                <p style="font-size: 14px; color: #222; margin: 20px 0;"><strong>Payment Method:</strong> <span style="text-transform: uppercase;">{{$order->payment?$order->payment->payment_method:''}}</span></p>
+                                {{-- <p style="font-size: 14px; color: #222; margin: 20px 0;"><strong>Payment Method:</strong> <span style="text-transform: uppercase;">{{$order->payment?$order->payment->payment_method:''}}</span></p> --}}
                                 <div class="invoice_form">
                                     <p style="font-size:16px;line-height:1.8;color:#222"><strong>Invoice From:</strong></p>
                                     <p style="font-size:16px;line-height:1.8;color:#222">{{$generalsetting->name}}</p>
@@ -75,6 +75,7 @@
                             <tr>
                                 <th>SL</th>
                                 <th>Product</th>
+                                <th>Product Code</th>
                                 <th>Price</th>
                                 <th>Qty</th>
                                 <th>Total</th>
@@ -85,6 +86,7 @@
                             <tr>
                                 <td>{{$loop->iteration}}</td>
                                 <td>{{$value->product_name}}</td>
+                                <td>{{$value->product_code}}</td>
                                 <td>৳{{$value->sale_price}}</td>
                                 <td>{{$value->qty}}</td>
                                 <td>৳{{$value->sale_price*$value->qty}}</td>
@@ -120,7 +122,7 @@
                     </div>
                 </div>
             </div>
-            
+
         </div>
     </div>
 </section>

@@ -31,7 +31,7 @@
                 <div class="col-sm-12">
                     <div class="details-product">
                         <div class="row">
-                            <div class="col-sm-6">
+                            <div class="col-xxl-4 col-xl-4 col-lg-6 col-md-12 col-sm-12 col-12">
                                 <div class="position-relative">
                                     @if ($details->old_price)
                                         <div class="discount">
@@ -76,9 +76,9 @@
                                     @endif
                                 </div>
                             </div>
-                            <div class="col-sm-6">
+                            <div class="col-xxl-4 col-xl-4 col-lg-6 col-md-12 col-sm-12 col-12">
                                 <div class="details_right">
-                                    <div class="breadcrumb">
+                                    <div class="breadcrumb d-none">
                                         <ul>
                                             <li><a href="{{ url('/') }}">Home</a></li>
                                             <li><span>/</span></li>
@@ -90,17 +90,24 @@
                                                 <li><a
                                                         href="#">{{ $details->subcategory ? $details->subcategory->name : '' }}</a>
                                                 </li>
-                                                @endif @if ($details->childcategory)
-                                                    <li><span>/</span></li>
-                                                    <li> <a href="#">{{ $details->childcategory->name }}</a>
-                                                    </li>
-                                                @endif
+                                            @endif
+                                            @if ($details->childcategory)
+                                                <li><span>/</span></li>
+                                                <li> <a href="#">{{ $details->childcategory->name }}</a>
+                                                </li>
+                                            @endif
                                         </ul>
                                     </div>
 
                                     <div class="product">
                                         <div class="product-cart">
                                             <p class="name">{{ $details->name }}</p>
+                                            <div class="single-product-whatsapp">
+                                                <a class="" href="https://wa.me/+88{{ $contact->hotline }}">
+                                                    @include('frontEnd.layouts.svg.whatsapp')
+                                                    Ask For Details
+                                                </a>
+                                            </div>
                                             @if ($details->variable_count > 0 && $details->type == 0)
                                                 <p class="details-price">
                                                     @if ($details->variable->old_price)
@@ -116,11 +123,11 @@
                                                     @endif ৳{{ $details->new_price }}
                                                 </p>
                                             @endif
-                                            @if ($details->pro_barcode)
-                                            <div class="single-product-attribute">
-                                                <strong>Code: </strong>
-                                                <span>{{ $details->pro_barcode }}</span>
-                                            </div>
+                                            @if ($details->product_code)
+                                                <div class="single-product-attribute">
+                                                    <strong>Code: </strong>
+                                                    <span>{{ $details->product_code }}</span>
+                                                </div>
                                             @endif
                                             <form action="{{ route('cart.store') }}" method="POST" name="formName">
                                                 @csrf
@@ -189,6 +196,11 @@
                                                         {{ $details->brand ? $details->brand->name : 'N/A' }}
                                                     </p>
                                                 </div>
+                                                <div class="pro_sold product-info-item">
+                                                    <p>Sold :
+                                                        {{ $details->sold }}
+                                                    </p>
+                                                </div>
                                                 <div class="product-stock-wrapper">
                                                     <div class="pro_brand stock"></div>
                                                 </div>
@@ -201,14 +213,15 @@
                                                             <span class="minus">
                                                                 <i class="fa fa-minus"></i>
                                                             </span>
-                                                            <input type="text" name="qty" value="1" />
+                                                            <input id="details_qty" type="text" name="qty" value="1" />
                                                             <span class="plus">
                                                                 <i class="fa fa-plus"></i>
                                                             </span>
                                                         </div>
                                                     </div>
                                                     <div class="col">
-                                                        <button onclick="return sendSuccess();" type="submit" id="add_cart_btn" class="btn px-4 add_cart_btn">
+                                                        <button  type="button" data-id="{{ $details->id }}"
+                                                            id="add_cart_btn" data-type="cart" class="btn px-4 add_cart_btn">
                                                             @include('frontEnd.layouts.svg.cart_updated')
                                                             Add To Cart
                                                         </button>
@@ -218,7 +231,9 @@
                                                     </div>
                                                 </div>
                                                 <div class="d-flex single_product col-sm-12">
-                                                    <button onclick="return sendSuccess();" type="submit" id="add_cart_btn" class="btn px-4 order_now_btn order_now_btn_m">
+                                                    <button onclick="return sendSuccess();" type="submit"
+                                                        id="order_now_btn" data-id="{{ $details->id }}"
+                                                        class="btn px-4 custom-shake order_now_btn order_now_btn_m">
                                                         @include('frontEnd.layouts.svg.order_now')
                                                         Order Now
                                                     </button>
@@ -226,30 +241,105 @@
                                                         onclick="return sendSuccess();" name="order_now"
                                                         value="Order Now" id="order_now" /> --}}
                                                 </div>
-                                                <div class="mt-md-2 mt-2">
-                                                    <h4 class="font-weight-bold">
-                                                        <a class="w-100 call_now_btn"
-                                                            href="tel: {{ $contact->hotline }}">
-                                                            <i class="fa-brands fa-whatsapp"></i>
-                                                            {{ $contact->hotline }}
-                                                        </a>
-                                                    </h4>
-                                                </div>
-                                                <div class="mt-3">
-                                                    <div class="del_charge_area">
-                                                        <table class="table table-bordered">
-                                                            <tbody>
-                                                                @foreach ($shippingcharge as $key => $value)
-                                                                    <tr>
-                                                                        <td>Delivery Charge</td>
-                                                                        <td>{{ $value->name }}</td>
-                                                                    </tr>
-                                                                @endforeach
-                                                            </tbody>
-                                                        </table>
-                                                    </div>
-                                                </div>
+
+
                                             </form>
+                                            <div class="contact-us-container">
+                                                <a href="tel:{{ $contact->phone }}" class="call-contact-us call-whats">
+                                                    <div class="call-icon">
+                                                        <i class="fa-solid fa-phone"></i>
+                                                    </div>
+                                                    <div class="contact-des">
+                                                        <h5>কল করুন</h5>
+                                                        <h6>
+                                                            {{ $contact->phone }}
+                                                        </h6>
+                                                    </div>
+                                                </a>
+                                                <a href="https://wa.me/+88{{ $contact->phone }}"
+                                                    class="call-contact-us call-whats">
+                                                    <div class="whats-up">
+                                                        <i class="fa-brands fa-whatsapp"></i>
+                                                    </div>
+                                                    <div class="contact-des">
+                                                        <h5>মেসেজ করুন</h5>
+                                                        <h6>
+                                                            {{ $contact->phone }}
+                                                        </h6>
+
+                                                    </div>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-xxl-4 col-xl-4 col-lg-6 col-md-12 col-sm-12 col-12">
+                                <div class="single-product-specification-content">
+                                    <div class="single-product-specification-list">
+                                        <ul>
+                                            <li class="">
+                                                <i class="fa-solid fa-check"></i>
+                                                Order today and receive it within 02 - 04 days.
+                                            </li>
+                                            <li class="">
+                                                <i class="fa-solid fa-thumbs-up"></i>
+                                                Quality Product
+                                            </li>
+                                            @if ($details->has_cod)
+                                                <li class="active">
+                                                    <i class="fa-solid fa-handshake"></i>
+                                                    Cash On Delivery Available
+                                                </li>
+                                            @endif
+                                            @foreach ($shippingcharge as $key => $value)
+                                                <li>
+                                                    <i class="fa-solid fa-truck-fast"></i>
+                                                    Delivery Charge {{ $value->name }}
+                                                </li>
+                                            @endforeach
+
+                                        </ul>
+                                    </div>
+                                    <div class="single-product-call-details">
+                                        <div class="single-product-call-title">
+                                            <p>Have question about this product ? please call</p>
+                                        </div>
+                                        <div class="single-product-call">
+                                            <ul>
+                                                <li>
+                                                    <a href="tel:{{ $contact->phone }}" class="single-product-call-link">
+                                                        <div class="single-product-call-content">
+                                                            <i class="fa-solid fa-phone"></i>
+                                                            {{ $contact->phone }}
+                                                        </div>
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a href="tel:01968853376" class="single-product-call-link">
+                                                        <div class="single-product-call-content">
+                                                            <i class="fa-solid fa-phone"></i>
+                                                            {{ $contact->hotline }}
+                                                        </div>
+                                                        <div class="single-product-call-payment-method">
+                                                            <p>Bkash Personal</p>
+                                                        </div>
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a href="tel:{{ $contact->hotline }}"
+                                                        class="single-product-call-link">
+                                                        <div class="single-product-call-content">
+                                                            <i class="fa-solid fa-phone"></i>
+                                                            {{ $contact->hotline }}
+                                                        </div>
+                                                        <div class="single-product-call-payment-method">
+                                                            <p>Nagad Personal</p>
+                                                        </div>
+                                                    </a>
+                                                </li>
+                                            </ul>
                                         </div>
                                     </div>
                                 </div>
@@ -309,8 +399,8 @@
                                             @if ($reviews->count() > 0)
                                                 <div class="customer-review">
                                                     <div class="row">
-                                                        @foreach ($reviews as $key => $review)
-                                                            <div class="col-sm-12 col-12">
+                                                        <div class="col-sm-6 col-12">
+                                                            @foreach ($reviews as $key => $review)
                                                                 <div class="review-card">
                                                                     <p class="reviewer_name"><i
                                                                             data-feather="message-square"></i>
@@ -320,8 +410,11 @@
                                                                     <p class="review_star">{!! str_repeat('<i class="fa-solid fa-star"></i>', $review->ratting) !!}</p>
                                                                     <p class="review_content">{{ $review->review }}</p>
                                                                 </div>
-                                                            </div>
-                                                        @endforeach
+                                                            @endforeach
+                                                        </div>
+                                                        <div class="col-sm-6 col-12">
+                                                            @include('frontEnd.layouts.partials.review_stars')
+                                                        </div>
                                                     </div>
                                                 </div>
                                             @else
@@ -463,7 +556,7 @@
         </div>
     </section>
 
-    <section class="related-product-section">
+    <section class="related-product-section d-sm-block d-none">
         <div class="container">
             <div class="row">
                 <div class="related-title">
@@ -473,6 +566,26 @@
             <div class="row">
                 <div class="col-sm-12">
                     <div class="product-inner owl-carousel related_slider">
+                        @foreach ($products as $key => $value)
+                            <div class="product_item wist_item">
+                                @include('frontEnd.layouts.partials.product')
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="related-product-section d-sm-none d-block">
+        <div class="container">
+            <div class="row">
+                <div class="related-title">
+                    <h5>Related Product</h5>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="product-inner related-product-mobile">
                         @foreach ($products as $key => $value)
                             <div class="product_item wist_item">
                                 @include('frontEnd.layouts.partials.product')
@@ -498,6 +611,22 @@
                 dots: false,
                 nav: false,
                 autoplay: false,
+                onChanged: function(event) {
+                    var currentIndex = event.item.index - event.relatedTarget._clones.length / 2;
+                    var totalItems = event.item.count;
+
+                    if (currentIndex < 0) {
+                        currentIndex = totalItems - 1;
+                    } else if (currentIndex >= totalItems) {
+                        currentIndex = 0;
+                    }
+
+                    console.log("Currently showing slide index:", currentIndex);
+                    $(".indicator-item").removeClass("active");
+
+                    // Add "active" to the correct indicator
+                    $(".indicator-item[data-id='" + currentIndex + "']").addClass("active");
+                }
             });
             $(".indicator-item,.color-item").on("click", function() {
                 var slideIndex = $(this).data('id');
@@ -643,6 +772,7 @@
             }
         }
     </script>
+    <script></script>
     <script>
         $(document).ready(function() {
             $(".rating label").click(function() {

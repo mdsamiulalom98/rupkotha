@@ -23,19 +23,17 @@
                             @csrf
                             <div class="checkout-card">
                                 <div class="checkout-header">
-                                    <h6 class = "check-position">Fill in the details and click on the "Confirm Order"
-                                        button
-                                    </h6>
+                                    <h6 class="check-position">ক্যাশ অন ডেলিভারিতে অর্ডার করতে আপনার তথ্য দিন</h6>
                                 </div>
                                 <div class="checkout-body">
                                     <div class="row">
                                         <div class="col-sm-12 ">
                                             <div class="form-group checkout-input-box mb-3">
-                                                <label for="name"> Full Name *</label>
+                                                <label for="name"> নামঃ *</label>
                                                 <input type="text" id="name"
                                                     class="form-control @error('name') is-invalid @enderror"
-                                                    name="name" value="{{ old('name') }}" placeholder=""
-                                                    required />
+                                                    name="name" value="{{ old('name') }}"
+                                                    placeholder="আপনার নাম লিখুন" required />
                                                 <i class="fa-solid fa-user"></i>
                                                 @error('name')
                                                     <span class="invalid-feedback" role="alert">
@@ -47,13 +45,13 @@
                                         <!-- col-end -->
                                         <div class="col-sm-12">
                                             <div class="form-group checkout-input-box mb-3">
-                                                <label for="phone"> Mobile Number *</label>
+                                                <label for="phone"> মোবাইলঃ *</label>
                                                 <input type="text" minlength="11" maxlength="11" pattern="0[0-9]+"
                                                     title="please enter number only and 0 must first character"
                                                     title="Please enter an 11-digit number." id="phone"
                                                     class="form-control @error('phone') is-invalid @enderror"
-                                                    name="phone" value="{{ old('phone') }}" placeholder=""
-                                                    required />
+                                                    name="phone" value="{{ old('phone') }}"
+                                                    placeholder="১১ ডিজিটের মোবাইল নাম্বার লিখুন" required />
                                                 <i class="fa-solid fa-phone"></i>
                                                 @error('phone')
                                                     <span class="invalid-feedback" role="alert">
@@ -65,11 +63,12 @@
                                         <!-- col-end -->
                                         <div class="col-sm-12">
                                             <div class="form-group checkout-input-box mb-3">
-                                                <label for="address"> Full Address *</label>
+                                                <label for="address"> ঠিকানাঃ *</label>
                                                 <input type="address" id="address"
                                                     class="form-control @error('address') is-invalid @enderror"
-                                                    name="address" placeholder="" value="{{ old('address') }}"
-                                                    required />
+                                                    name="address"
+                                                    placeholder="আপনার এলাকা থানা ও জেলার নাম লিখুন এখানে"
+                                                    value="{{ old('address') }}" required />
                                                 <i class="fa-solid fa-map"></i>
                                                 @error('email')
                                                     <span class="invalid-feedback" role="alert">
@@ -102,7 +101,7 @@
                                         </div>
                                         <!-- col-end -->
                                         <div class="form-group mt-3">
-                                            <label for="" class="form-label">Zone</label>
+                                            <label for="" class="form-label">Upazilla</label>
                                             <select name="thana" id="thana"
                                                 class="thana form-select chosen-select form-control  {{ $errors->has('thana') ? ' is-invalid' : '' }}"
                                                 value="{{ old('thana') }}" style="width:100%">
@@ -255,7 +254,7 @@
                             </div>
                             <div class="col-sm-12">
                                 <div class="form-group">
-                                    <button class="order_place send_otp" type="submit">Confirm
+                                    <button class="order_place send_otp custom-shake" type="submit">Confirm
                                         Order</button>
                                 </div>
                             </div>
@@ -331,6 +330,8 @@
     $(document).ready(function() {
         $('.district').change(function() {
             var id = $(this).val();
+            shipping_charge(id);
+            draft_order();
             if (id) {
                 $.ajax({
                     type: "GET",
@@ -357,6 +358,44 @@
             }
         });
     });
+
+    function shipping_charge(id) {
+        $.ajax({
+            type: "GET",
+            data: {
+                id: id
+            },
+            url: "{{ route('shipping.charge') }}",
+            dataType: "html",
+            success: function(response) {
+                $(".cartlist").html(response);
+            },
+        });
+    }
+
+    function draft_order() {
+        var district = $('.district').val();
+        var name = $("#name").val();
+        var phone = $("#phone").val();
+        var address = $("#address").val();
+        if (district && name && phone && address) {
+            $.ajax({
+                type: "GET",
+                data: {
+                    district,
+                    name,
+                    phone,
+                    address
+                },
+                url: "{{ route('order.store.draft') }}",
+                success: function(data) {
+                    if (data) {
+                        return data;
+                    }
+                },
+            });
+        }
+    }
 </script>
 <script type="text/javascript">
     // $(document).ready(function() {
@@ -465,7 +504,7 @@
                 '<span class="validation-error" style="color:red;">This field is required.</span>');
         }
 
-        if(phone === '' || name === '' || address === '') {
+        if (phone === '' || name === '' || address === '') {
             $("html, body").animate({
                 scrollTop: 0
             }, 800);

@@ -198,7 +198,6 @@ class FrontendController extends Controller
 
     public function details($slug)
     {
-
         $details = Product::where(['slug' => $slug, 'status' => 1])
             ->with('image', 'images', 'category', 'subcategory', 'childcategory')
             ->withCount('variable')
@@ -212,6 +211,19 @@ class FrontendController extends Controller
 
         $shippingcharge = ShippingCharge::where('status', 1)->get();
         $reviews = Review::where('product_id', $details->id)->get();
+        $total_reviews = $reviews->count();
+        $five_stars = $reviews->where('ratting', 5)->count();
+        $four_stars = $reviews->where('ratting', 4)->count();
+        $three_stars = $reviews->where('ratting', 3)->count();
+        $two_stars = $reviews->where('ratting', 2)->count();
+        $one_stars = $reviews->where('ratting', 1)->count();
+
+        // Avoid division by zero
+        $five_stars_percentage = $total_reviews > 0 ? round(($five_stars / $total_reviews) * 100, 2) : 0;
+        $four_stars_percentage = $total_reviews > 0 ? round(($four_stars / $total_reviews) * 100, 2) : 0;
+        $three_stars_percentage = $total_reviews > 0 ? round(($three_stars / $total_reviews) * 100, 2) : 0;
+        $two_stars_percentage = $total_reviews > 0 ? round(($two_stars / $total_reviews) * 100, 2) : 0;
+        $one_stars_percentage = $total_reviews > 0 ? round(($one_stars / $total_reviews) * 100, 2) : 0;
 
         $productcolors = ProductVariable::where('product_id', $details->id)->where('stock', '>', 0)
             ->whereNotNull('color')
@@ -225,7 +237,7 @@ class FrontendController extends Controller
             ->distinct()
             ->get();
 
-        return view('frontEnd.layouts.pages.details', compact('details', 'products', 'shippingcharge', 'productcolors', 'productsizes', 'reviews'));
+        return view('frontEnd.layouts.pages.details', compact('details', 'products', 'shippingcharge', 'productcolors', 'productsizes', 'reviews', 'five_stars_percentage', 'four_stars_percentage', 'three_stars_percentage', 'two_stars_percentage', 'one_stars_percentage'));
     }
     public function stock_check(Request $request)
     {
@@ -282,13 +294,12 @@ class FrontendController extends Controller
         return view('frontEnd.layouts.pages.search', compact('products', 'keyword'));
     }
 
-
     public function shipping_charge(Request $request)
     {
         if ($request->id == NULL) {
             Session::put('shipping', 0);
         } else {
-            $shipping = ShippingCharge::where(['id' => $request->id])->first();
+            $shipping = ShippingCharge::where('id', $request->id == 1 ? 1 : 2)->first();
             Session::put('shipping', $shipping->amount);
         }
         if ($request->campaign == 1) {
@@ -297,7 +308,6 @@ class FrontendController extends Controller
         }
         return view('frontEnd.layouts.ajax.cart');
     }
-
 
     public function contact(Request $request)
     {

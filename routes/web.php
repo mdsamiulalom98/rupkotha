@@ -90,6 +90,7 @@ Route::group(['namespace' => 'Frontend', 'middleware' => ['ipcheck', 'check_refe
     Route::get('cart/remove-bn', [ShoppingController::class, 'cart_remove_bn'])->name('cart.remove_bn');
     Route::get('cart/content', [ShoppingController::class, 'cart_content'])->name('cart.content');
     Route::get('cart/count', [ShoppingController::class, 'cart_count'])->name('cart.count');
+    Route::get('mini/cart', [ShoppingController::class, 'mini_cart'])->name('mini.cart');
     Route::get('mobilecart/count', [ShoppingController::class, 'mobilecart_qty'])->name('mobile.cart.count');
     Route::get('cart/decrement', [ShoppingController::class, 'cart_decrement'])->name('cart.decrement');
     Route::get('cart/increment', [ShoppingController::class, 'cart_increment'])->name('cart.increment');
@@ -115,6 +116,7 @@ Route::group(['prefix' => 'customer', 'namespace' => 'Frontend', 'middleware' =>
     Route::post('/forgot-password/resendotp', [CustomerController::class, 'forgot_resend'])->name('customer.forgot.resendotp');
     Route::get('/checkout', [CustomerController::class, 'checkout'])->name('customer.checkout');
     Route::post('/order-save', [CustomerController::class, 'order_save'])->name('customer.ordersave');
+    Route::get('/order-save-draft', [CustomerController::class, 'order_save_draft'])->name('order.store.draft');
     Route::get('/order-success/{id}', [CustomerController::class, 'order_success'])->name('customer.order_success');
     Route::get('/order-track', [CustomerController::class, 'order_track'])->name('customer.order_track');
     Route::get('/order-track/result', [CustomerController::class, 'order_track_result'])->name('customer.order_track_result');
